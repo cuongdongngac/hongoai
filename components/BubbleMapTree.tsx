@@ -4,7 +4,6 @@ import { Person, Relationship } from "@/types";
 import { buildAdjacencyLists, getFilteredTreeData } from "@/utils/treeHelpers";
 import * as d3 from "d3";
 import { useEffect, useMemo, useRef } from "react";
-import { useDashboard } from "./DashboardContext";
 import { AVATAR_VERSION } from "./DefaultAvatar";
 
 export interface BubbleMapTreeProps {
@@ -27,6 +26,8 @@ interface GraphLink extends d3.SimulationLinkDatum<GraphNode> {
   type: string;
 }
 
+const showAvatar = true;
+
 export default function BubbleMapTree({
   personsMap,
   relationships,
@@ -34,7 +35,7 @@ export default function BubbleMapTree({
 }: BubbleMapTreeProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
-  const { showAvatar } = useDashboard();
+  // const { showAvatar } = useDashboard();
 
   const adj = useMemo(
     () => buildAdjacencyLists(relationships, personsMap),
@@ -314,7 +315,7 @@ export default function BubbleMapTree({
     return () => {
       simulation.stop();
     };
-  }, [nodes, links, showAvatar]);
+  }, [nodes, links]);
 
   return (
     <div className="absolute inset-0 overflow-hidden bg-stone-50 rounded-2xl border border-stone-200/60 shadow-inner">
