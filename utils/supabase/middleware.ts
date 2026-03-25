@@ -47,16 +47,30 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Protected routes
-  const protectedPaths = ["/dashboard"];
-  const isProtectedPath = protectedPaths.some((path) =>
-    request.nextUrl.pathname.startsWith(path),
+  // Routes that require authentication (admin/editor only)
+  const adminOnlyPaths = [
+    "/dashboard/users",
+    "/dashboard/data",
+    "/dashboard/lineage",
+    "/dashboard/members/new",
+  ];
+  // Edit pages: /dashboard/members/[id]/edit
+  const isEditPage = /^\/dashboard\/members\/[^/]+\/edit/.test(
+    request.nextUrl.pathname,
   );
 
+  const isAdminOnlyPath =
+    isEditPage ||
+    adminOnlyPaths.some((path) =>
+      request.nextUrl.pathname.startsWith(path),
+    );
+
+  // Any dashboard path (for DB schema check)
+  const isDashboardPath = request.nextUrl.pathname.startsWith("/dashboard");
   const isLoginPage = request.nextUrl.pathname.startsWith("/login");
 
   // Check if DB schema is initialized by checking if profiles table exists
-  if (isProtectedPath || isLoginPage) {
+  if (isDashboardPath || isLoginPage) {
     const { error: profileError } = await supabase
       .from("profiles")
       .select("id")
@@ -72,8 +86,8 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  if (isProtectedPath && !user) {
-    // no user, potentially respond by redirecting the user to the login page
+  // Admin-only paths require login
+  if (isAdminOnlyPath && !user) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);

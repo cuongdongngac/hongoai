@@ -5,7 +5,6 @@ import LogoutButton from "@/components/LogoutButton";
 import { UserProvider } from "@/components/UserProvider";
 import { getProfile, getUser } from "@/utils/supabase/queries";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import React from "react";
 
 export default async function DashboardLayout({
@@ -14,14 +13,10 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   const user = await getUser();
+  const profile = user ? await getProfile(user.id) : null;
 
-  if (!user) {
-    redirect("/login");
-  }
-
-  const profile = await getProfile(user.id);
-
-  if (!profile?.is_active) {
+  // Only redirect inactive logged-in users (guests with no account can view freely)
+  if (user && !profile?.is_active) {
     return (
       <div className="min-h-screen bg-stone-50 text-stone-900 flex flex-col font-sans">
         <header className="sticky top-0 z-30 bg-white/80 border-b border-stone-200 shadow-sm transition-all duration-200">

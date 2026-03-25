@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { BarChart2, ChevronDown, Database, GitMerge, Info, Network, UserCircle, Users } from "lucide-react";
+import { BarChart2, ChevronDown, Database, GitMerge, Info, LogIn, Network, UserCircle, Users } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import LogoutButton from "./LogoutButton";
@@ -23,6 +23,19 @@ export default function HeaderMenu() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Guest: show login button
+  if (!user) {
+    return (
+      <Link
+        href="/login"
+        className="flex items-center gap-2 px-4 py-2 rounded-full bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold transition-colors shadow-sm"
+      >
+        <LogIn className="size-4" />
+        Đăng nhập
+      </Link>
+    );
+  }
 
   return (
     <div className="relative" ref={menuRef}>
@@ -78,7 +91,7 @@ export default function HeaderMenu() {
                 <Network className="size-4" />
                 Cây gia phả
               </Link>
-              
+
               <Link
                 href="/dashboard/kinship"
                 onClick={() => setIsOpen(false)}
@@ -104,7 +117,7 @@ export default function HeaderMenu() {
                       Quản trị viên
                     </p>
                   </div>
-                  
+
                   <Link
                     href="/dashboard/users"
                     onClick={() => setIsOpen(false)}
