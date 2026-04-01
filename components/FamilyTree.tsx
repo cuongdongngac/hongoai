@@ -45,7 +45,7 @@ export default function FamilyTree({
     DEFAULT_AUTO_COLLAPSE_LEVEL,
   );
 
-  const { showAvatar } = useDashboard();
+  const { showAvatar, setRootId } = useDashboard();
 
   const {
     scale,
@@ -61,6 +61,25 @@ export default function FamilyTree({
       handleResetZoom,
     },
   } = usePanZoom(containerRef);
+
+  // Logic to find the "next" root when clicking container background
+  const handleContainerClick = (e: React.MouseEvent) => {
+    // Only trigger if clicking exactly the container background
+    if (e.target !== e.currentTarget) return;
+
+    if (roots.length > 0) {
+      const currentRoot = roots[0];
+      const allPersons = Array.from(personsMap.values());
+
+      // Try to find someone to the "right" or "next" in some order
+      // A simple way is to find the next person in the persons array
+      const currentIndex = allPersons.findIndex((p) => p.id === currentRoot.id);
+      if (currentIndex !== -1) {
+        const nextIndex = (currentIndex + 1) % allPersons.length;
+        setRootId(allPersons[nextIndex].id);
+      }
+    }
+  };
 
   // Center the scroll area horizontally
   const centerTree = useCallback(() => {
@@ -332,7 +351,13 @@ export default function FamilyTree({
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUpOrLeave}
         onMouseLeave={handleMouseUpOrLeave}
-        onClickCapture={handleClickCapture}
+        onClickCapture={(e) => {
+          handleClickCapture(e);
+          // If it was a simple click (not dragging), try to handle container click
+          if (!isDragging) {
+            handleContainerClick(e);
+          }
+        }}
         onDragStart={(e) => e.preventDefault()} // Prevent browser default dragging of links/images
       >
         {/* We use a style block to inject the CSS logic for the family tree lines */}

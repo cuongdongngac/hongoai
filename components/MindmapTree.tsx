@@ -24,7 +24,7 @@ export default function MindmapTree({
   roots,
   canEdit,
 }: MindmapTreeProps) {
-  const { showAvatar, setMemberModalId } = useDashboard();
+  const { showAvatar, setMemberModalId, setRootId } = useDashboard();
   const [hideDaughtersInLaw, setHideDaughtersInLaw] = useState(false);
   const [hideSonsInLaw, setHideSonsInLaw] = useState(false);
   const [hideDaughters, setHideDaughters] = useState(false);
@@ -58,6 +58,7 @@ export default function MindmapTree({
       autoCollapseLevel,
       expandSignal,
       setMemberModalId,
+      setRootId,
     };
   }, [
     personsMap,
@@ -73,7 +74,23 @@ export default function MindmapTree({
     autoCollapseLevel,
     expandSignal,
     setMemberModalId,
+    setRootId,
   ]);
+
+  const handleContainerClick = (e: React.MouseEvent) => {
+    // Only trigger if clicking exactly the container background
+    if (e.target !== e.currentTarget) return;
+
+    if (roots.length > 0) {
+      const currentRoot = roots[0];
+      const allPersons = Array.from(personsMap.values());
+      const currentIndex = allPersons.findIndex((p) => p.id === currentRoot.id);
+      if (currentIndex !== -1) {
+        const nextIndex = (currentIndex + 1) % allPersons.length;
+        setRootId(allPersons[nextIndex].id);
+      }
+    }
+  };
 
   if (roots.length === 0) {
     return (
@@ -89,7 +106,10 @@ export default function MindmapTree({
   }
 
   return (
-    <div className="w-full h-full relative p-4 sm:p-6 lg:p-8 min-h-[calc(100vh-140px)] flex justify-start lg:justify-center overflow-x-auto">
+    <div
+      onClick={handleContainerClick}
+      className="w-full h-full relative p-4 sm:p-6 lg:p-8 min-h-[calc(100vh-140px)] flex justify-start lg:justify-center overflow-x-auto"
+    >
       <MindmapToolbar
         hideDaughtersInLaw={hideDaughtersInLaw}
         setHideDaughtersInLaw={setHideDaughtersInLaw}

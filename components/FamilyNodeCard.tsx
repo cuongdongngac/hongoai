@@ -24,15 +24,21 @@ export default function FamilyNodeCard({
   isRingVisible = false,
   isPlusVisible = false,
 }: FamilyNodeCardProps) {
-  const { showAvatar, setMemberModalId } = useDashboard();
+  const { showAvatar, setMemberModalId, setRootId } = useDashboard();
 
   const isDeceased = person.is_deceased;
 
   const content = (
     <div
-      onClick={onClickCard}
+      onClick={(e) => {
+        if (onClickCard) {
+          onClickCard();
+        } else {
+          setRootId(person.id);
+        }
+      }}
       className={`
-        group py-2 px-1 flex flex-col items-center justify-start transition-all duration-300 hover:-translate-y-1 rounded-2xl relative h-full
+        group py-2 px-1 flex flex-col items-center justify-start transition-all duration-300 hover:-translate-y-1 rounded-2xl relative h-full cursor-pointer
         ${isDeceased ? "grayscale-[0.4] opacity-80" : ""}
         ${showAvatar ? "w-20 sm:w-24 md:w-28 bg-white/70 hover:shadow-xl" : "px-3"}
       `}
@@ -62,8 +68,12 @@ export default function FamilyNodeCard({
       {showAvatar && (
         <div className="relative z-10 mb-1.5 sm:mb-2">
           <div
+            onClick={(e) => {
+              e.stopPropagation();
+              setMemberModalId(person.id);
+            }}
             className={`
-              h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 rounded-full flex items-center justify-center text-[10px] sm:text-xs md:text-sm text-white overflow-hidden shrink-0 shadow-lg ring-2 ring-white transition-transform duration-300 group-hover:scale-105
+              h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 rounded-full flex items-center justify-center text-[10px] sm:text-xs md:text-sm text-white overflow-hidden shrink-0 shadow-lg ring-2 ring-white transition-transform duration-300 group-hover:scale-105 cursor-pointer
               ${getAvatarBg(person.gender)}
             `}
           >
@@ -115,9 +125,5 @@ export default function FamilyNodeCard({
     return content;
   }
 
-  return (
-    <button onClick={() => setMemberModalId(person.id)} className="block w-fit">
-      {content}
-    </button>
-  );
+  return <div className="block w-fit">{content}</div>;
 }

@@ -25,6 +25,7 @@ export interface MindmapContextData {
   autoCollapseLevel: number;
   expandSignal: { type: "expand" | "collapse"; ts: number } | null;
   setMemberModalId: (id: string | null) => void;
+  setRootId: (id: string | null) => void;
 }
 
 export const getTreeData = (personId: string, ctx: MindmapContextData) => {
@@ -131,14 +132,18 @@ export const MindmapNode = memo(
                 transition={{ duration: 0.3 }}
                 className={`group/card relative flex flex-wrap items-center gap-2 bg-white/60 rounded-2xl border border-stone-200/60 p-2 sm:p-2.5 shadow-sm hover:border-amber-300 hover:shadow-md hover:bg-white/90 transition-all duration-300 overflow-hidden cursor-pointer
                 ${data.person.is_deceased ? "opacity-80 grayscale-[0.3]" : ""}`}
-                onClick={() => ctx.setMemberModalId(data.person.id)}
+                onClick={() => ctx.setRootId(data.person.id)}
               >
                 <div className="flex items-center gap-2.5 relative z-10 w-full">
                   <div className="flex flex-1 items-center gap-2.5 min-w-0">
                     {ctx.showAvatar && (
                       <div className="relative shrink-0">
                         <div
-                          className={`size-10 rounded-full overflow-hidden flex items-center justify-center text-white text-xs font-bold shadow-md ring-2 ring-white transition-transform duration-300 group-hover/card:scale-105 ${getAvatarBg(data.person.gender)}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            ctx.setMemberModalId(data.person.id);
+                          }}
+                          className={`size-10 rounded-full overflow-hidden flex items-center justify-center text-white text-xs font-bold shadow-md ring-2 ring-white transition-transform duration-300 group-hover/card:scale-105 cursor-pointer ${getAvatarBg(data.person.gender)}`}
                         >
                           {data.person.avatar_url ? (
                             <Image
