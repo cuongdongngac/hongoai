@@ -57,7 +57,6 @@ export default function ExportButton({
 
       if (format === "csv") {
         const { exportToCsvZip } = await import("@/utils/csv");
-        // @ts-expect-error: BackupPayload relationships type mismatch with Partial<Relationship>
         const zipBlob = await exportToCsvZip(data);
         const url = URL.createObjectURL(zipBlob);
         const a = document.createElement("a");
@@ -80,7 +79,6 @@ export default function ExportButton({
         extension = "json";
       } else {
         const { exportToGedcom } = await import("@/utils/gedcom");
-        // @ts-expect-error: Gedcom types mismatch
         content = exportToGedcom(data);
         type = "text/plain";
         extension = "ged";

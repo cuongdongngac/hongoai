@@ -66,9 +66,8 @@ export default function MemberDetailModal() {
         } else {
           setPrivateData(null);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error("Error fetching member details:", err);
-        // @ts-expect-error - err is caught as unknown, but we check for message
         setError(err?.message || "Đã xảy ra lỗi hệ thống.");
       } finally {
         setLoading(false);
