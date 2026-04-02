@@ -5,6 +5,7 @@ import { Person, Relationship } from "@/types";
 import { ArrowUpDown, Filter, Plus, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useDashboard } from "./DashboardContext";
+import ExportButton from "./ExportButton";
 
 export default function DashboardMemberList({
   initialPersons,
@@ -348,21 +349,27 @@ export default function DashboardMemberList({
               </div>
             </div>
           </div>
-          {canEdit && (
-            <button
-              onClick={() => setShowCreateMember(true)}
-              className="btn-primary"
-            >
-              <Plus className="size-4" strokeWidth={2.5} />
-              Thêm thành viên
-            </button>
-          )}
+          <div className="flex items-center gap-2">
+            {canEdit && (
+              <button
+                onClick={() => setShowCreateMember(true)}
+                className="btn-primary"
+              >
+                <Plus className="size-4" strokeWidth={2.5} />
+                Thêm thành viên
+              </button>
+            )}
+            <ExportButton
+              persons={initialPersons}
+              relationships={relationships}
+            />
+          </div>
         </div>
       </div>
 
       {sortedPersons.length > 0 ? (
         sortOption.includes("generation") ? (
-          <div className="space-y-12">
+          <div id="export-container" className="space-y-12">
             {Object.entries(
               sortedPersons.reduce(
                 (acc, person) => {
@@ -599,7 +606,10 @@ export default function DashboardMemberList({
               })}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div
+            id="export-container"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
             {sortedPersons.map((person) => (
               <PersonCard key={person.id} person={person} />
             ))}

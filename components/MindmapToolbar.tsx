@@ -1,12 +1,18 @@
 import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
 import BaseToolbar, { BaseToolbarProps } from "./BaseToolbar";
+import ExportButton from "./ExportButton";
+import { Person, Relationship } from "@/types";
 
 interface MindmapToolbarProps extends BaseToolbarProps {
   setExpandSignal: (val: { type: "expand" | "collapse"; ts: number }) => void;
+  persons: Person[];
+  relationships: Relationship[];
 }
 
 export default function MindmapToolbar({
   setExpandSignal,
+  persons,
+  relationships,
   ...baseProps
 }: MindmapToolbarProps) {
   return (
@@ -30,6 +36,9 @@ export default function MindmapToolbar({
           <span className="hidden sm:inline text-xs sm:text-sm">Mở rộng</span>
         </button>
       </div>
+
+      {/* Export Button */}
+      <ExportButton persons={persons} relationships={relationships} />
     </BaseToolbar>
   );
 }

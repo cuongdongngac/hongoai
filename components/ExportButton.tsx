@@ -5,19 +5,34 @@ import { toJpeg, toPng } from "html-to-image";
 import jsPDF from "jspdf";
 import {
   AlertCircle,
+  Database,
   Download,
+  FileCode,
   FileImage,
+  FileJson,
   FileText,
+  Globe,
   Loader2,
   X,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useDashboard } from "./DashboardContext";
+import { generateInteractiveHTML, downloadHTMLFile } from "@/utils/htmlExport";
+import { Person, Relationship } from "@/types";
+import { exportData } from "@/app/actions/data";
 
-export default function ExportButton() {
+export default function ExportButton({
+  persons,
+  relationships,
+}: {
+  persons: Person[];
+  relationships: Relationship[];
+}) {
   const [isExporting, setIsExporting] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const { view, rootId } = useDashboard();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -29,13 +44,97 @@ export default function ExportButton() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleExport = async (format: "png" | "pdf") => {
+  const handleDataExport = async (format: "json" | "gedcom" | "csv") => {
+    try {
+      setIsExporting(true);
+      setShowMenu(false);
+
+      const data = await exportData(rootId || undefined);
+
+      if ("error" in data) {
+        throw new Error(data.error);
+      }
+
+      if (format === "csv") {
+        const { exportToCsvZip } = await import("@/utils/csv");
+        // @ts-expect-error: BackupPayload relationships type mismatch with Partial<Relationship>
+        const zipBlob = await exportToCsvZip(data);
+        const url = URL.createObjectURL(zipBlob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `giapha-export-${new Date().toISOString().split("T")[0]}.zip`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        return;
+      }
+
+      let content = "";
+      let type = "";
+      let extension = "";
+
+      if (format === "json") {
+        content = JSON.stringify(data, null, 2);
+        type = "application/json";
+        extension = "json";
+      } else {
+        const { exportToGedcom } = await import("@/utils/gedcom");
+        // @ts-expect-error: Gedcom types mismatch
+        content = exportToGedcom(data);
+        type = "text/plain";
+        extension = "ged";
+      }
+
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `giapha-export-${new Date().toISOString().split("T")[0]}.${extension}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err: any) {
+      console.error("Data export failed:", err);
+      setError(err.message || "Xuất dữ liệu thất bại.");
+      setTimeout(() => setError(null), 5000);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleExport = async (format: "png" | "pdf" | "html") => {
     try {
       setIsExporting(true);
       setShowMenu(false);
       setError(null);
 
-      // Add a small delay to allow UI to update (close menu) before capturing
+      if (format === "html") {
+        if (!rootId) {
+          throw new Error("Vui lòng chọn gốc hiển thị trước khi xuất HTML.");
+        }
+
+        const personsMap = new Map(persons.map((p) => [p.id, p]));
+        const roots = persons.filter((p) => p.id === rootId);
+
+        if (roots.length === 0) {
+          throw new Error("Không tìm thấy người gốc đã chọn.");
+        }
+
+        const html = await generateInteractiveHTML({
+          personsMap,
+          relationships,
+          roots,
+          view: view === "tree" || view === "mindmap" ? view : "tree",
+          maxDepth: 999,
+        });
+
+        const filename = `gia-pha-${view}-${new Date().toISOString().split("T")[0]}.html`;
+        downloadHTMLFile(html, filename);
+        return;
+      }
+
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       const element = document.getElementById("export-container");
@@ -61,37 +160,37 @@ export default function ExportButton() {
         const url = await toPng(element, exportOptions);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `giapha-sodo-${new Date().toISOString().split("T")[0]}.png`;
-        document.body.appendChild(a);
+        a.download = `gia-pha-${view}-${new Date().toISOString().split("T")[0]}.png`;
         a.click();
-        document.body.removeChild(a);
       } else if (format === "pdf") {
-        const imgData = await toJpeg(element, {
-          ...exportOptions,
-          quality: 0.95,
-        });
-
-        // Get the actual width and height of the element to calculate PDF dimensions
-        const width = element.scrollWidth;
-        const height = element.scrollHeight;
-
+        const url = await toJpeg(element, { ...exportOptions, quality: 0.95 });
         const pdf = new jsPDF({
-          orientation: width > height ? "landscape" : "portrait",
+          orientation:
+            element.scrollWidth > element.scrollHeight
+              ? "landscape"
+              : "portrait",
           unit: "px",
-          format: [width, height],
+          format: [element.scrollWidth, element.scrollHeight],
         });
-        pdf.addImage(imgData, "JPEG", 0, 0, width, height);
-        pdf.save(`giapha-sodo-${new Date().toISOString().split("T")[0]}.pdf`);
+        pdf.addImage(
+          url,
+          "JPEG",
+          0,
+          0,
+          element.scrollWidth,
+          element.scrollHeight,
+        );
+        pdf.save(
+          `gia-pha-${view}-${new Date().toISOString().split("T")[0]}.pdf`,
+        );
       }
-    } catch (err) {
-      console.error("Export error:", err);
-      setError("Đã xảy ra lỗi khi xuất file. Vui lòng thử lại.");
+
+      element.classList.remove("exporting");
+    } catch (err: any) {
+      console.error("Export failed:", err);
+      setError(err.message || "Xuất file thất bại. Vui lòng thử lại.");
       setTimeout(() => setError(null), 5000);
     } finally {
-      const element = document.getElementById("export-container");
-      if (element) {
-        element.classList.remove("exporting");
-      }
       setIsExporting(false);
     }
   };
@@ -101,40 +200,79 @@ export default function ExportButton() {
       <button
         onClick={() => setShowMenu(!showMenu)}
         disabled={isExporting}
-        className="btn"
+        className="flex items-center justify-center px-4 h-10 rounded-full bg-white/80 backdrop-blur-md shadow-sm border border-stone-200/60 text-stone-600 hover:bg-white hover:text-stone-900 hover:shadow-md transition-all disabled:opacity-50 gap-2"
+        title="Xuất file"
       >
         {isExporting ? (
-          <Loader2 className="size-4 shrink-0 animate-spin" />
+          <Loader2 className="size-4 animate-spin" />
         ) : (
-          <Download className="size-4 shrink-0" />
+          <Download className="size-4" />
         )}
-        <span className="hidden sm:inline tracking-wide min-w-max">
-          {isExporting ? "Đang xuất..." : "Xuất file"}
-        </span>
+        <span className="text-sm font-medium">Xuất file</span>
       </button>
 
       <AnimatePresence>
-        {showMenu && !isExporting && (
+        {showMenu && (
           <motion.div
-            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            initial={{ opacity: 0, y: -10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            transition={{ duration: 0.15, ease: "easeOut" }}
-            className="absolute top-full right-0 sm:right-auto sm:left-0 mt-2 w-48 bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-stone-200/60 py-2 z-50 overflow-hidden"
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            className="absolute top-full mt-2 right-0 w-56 bg-white rounded-2xl shadow-xl border border-stone-200/60 py-2 z-50 overflow-hidden"
           >
+            <div className="px-3 py-1.5 text-[10px] font-bold text-stone-400 uppercase tracking-widest border-b border-stone-100 mb-1">
+              Hình ảnh & Tài liệu
+            </div>
+
             <button
               onClick={() => handleExport("png")}
-              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-stone-700 hover:text-amber-700 hover:bg-amber-50 transition-colors text-left"
+              className="w-full px-4 py-2 text-left text-sm text-stone-700 hover:bg-amber-50 hover:text-amber-900 flex items-center gap-3 transition-colors"
             >
-              <FileImage className="size-4" />
-              Lưu thành Ảnh (PNG)
+              <FileImage className="size-4 text-blue-500" />
+              <span>Ảnh (PNG)</span>
             </button>
+
             <button
               onClick={() => handleExport("pdf")}
-              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-stone-700 hover:text-amber-700 hover:bg-amber-50 transition-colors text-left"
+              className="w-full px-4 py-2 text-left text-sm text-stone-700 hover:bg-amber-50 hover:text-amber-900 flex items-center gap-3 transition-colors"
             >
-              <FileText className="size-4" />
-              Lưu thành PDF
+              <FileText className="size-4 text-red-500" />
+              <span>Tài liệu (PDF)</span>
+            </button>
+
+            <button
+              onClick={() => handleExport("html")}
+              className="w-full px-4 py-2 text-left text-sm text-stone-700 hover:bg-amber-50 hover:text-amber-900 flex items-center gap-3 transition-colors"
+            >
+              <Globe className="size-4 text-emerald-500" />
+              <span>Web (HTML)</span>
+            </button>
+
+            <div className="px-3 py-1.5 text-[10px] font-bold text-stone-400 uppercase tracking-widest border-y border-stone-100 my-1">
+              Dữ liệu
+            </div>
+
+            <button
+              onClick={() => handleDataExport("json")}
+              className="w-full px-4 py-2 text-left text-sm text-stone-700 hover:bg-amber-50 hover:text-amber-900 flex items-center gap-3 transition-colors"
+            >
+              <FileJson className="size-4 text-amber-500" />
+              <span>Dữ liệu (JSON)</span>
+            </button>
+
+            <button
+              onClick={() => handleDataExport("gedcom")}
+              className="w-full px-4 py-2 text-left text-sm text-stone-700 hover:bg-amber-50 hover:text-amber-900 flex items-center gap-3 transition-colors"
+            >
+              <FileCode className="size-4 text-indigo-500" />
+              <span>GEDCOM 7.0</span>
+            </button>
+
+            <button
+              onClick={() => handleDataExport("csv")}
+              className="w-full px-4 py-2 text-left text-sm text-stone-700 hover:bg-amber-50 hover:text-amber-900 flex items-center gap-3 transition-colors"
+            >
+              <Database className="size-4 text-stone-500" />
+              <span>Excel/CSV (.zip)</span>
             </button>
           </motion.div>
         )}
@@ -143,25 +281,16 @@ export default function ExportButton() {
       <AnimatePresence>
         {error && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: -10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: -10 }}
-            className="absolute top-full right-0 mt-2 w-64 p-3 bg-red-50 border border-red-200 rounded-lg shadow-lg z-50 flex flex-col gap-1"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            className="fixed bottom-24 right-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 z-[100]"
           >
-            <div className="flex items-start justify-between">
-              <div className="flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
-                <span className="text-sm font-medium text-red-800 leading-snug">
-                  {error}
-                </span>
-              </div>
-              <button
-                onClick={() => setError(null)}
-                className="text-red-400 hover:text-red-600 transition-colors shrink-0"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
+            <AlertCircle className="size-5 text-red-500 shrink-0" />
+            <div className="text-sm font-medium">{error}</div>
+            <button onClick={() => setError(null)} className="ml-2">
+              <X className="size-4 text-red-400" />
+            </button>
           </motion.div>
         )}
       </AnimatePresence>

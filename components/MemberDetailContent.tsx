@@ -20,10 +20,12 @@ import {
   Leaf,
   MapPin,
   Phone,
+  Search,
   UserPlus,
   Users,
 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useCallback, useState } from "react";
 import { FemaleIcon, MaleIcon } from "./GenderIcons";
 
@@ -503,6 +505,22 @@ export default function MemberDetailContent({
                     </div>
                   </motion.div>
                 )}
+
+              {/* Lineage Trace Button */}
+              {!person.is_in_law && (
+                <motion.div
+                  variants={itemVariants}
+                  className="col-span-1 sm:col-span-2 md:col-span-3"
+                >
+                  <Link
+                    href={`/dashboard/lineage-trace?personId=${person.id}`}
+                    className="flex items-center justify-center gap-3 w-full py-4 bg-linear-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-2xl font-bold shadow-lg shadow-amber-200/50 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    <Search className="size-5" />
+                    <span>Truy vết nguồn gốc</span>
+                  </Link>
+                </motion.div>
+              )}
             </div>
           </div>
         </motion.div>

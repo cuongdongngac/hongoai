@@ -188,7 +188,6 @@ export default function MemberDetailModal() {
                   <span className="hidden sm:inline">Quay lại</span>
                 </button>
               ) : (
-                canEdit &&
                 person && (
                   <>
                     <Link
@@ -198,13 +197,15 @@ export default function MemberDetailModal() {
                       <ExternalLink className="size-4" />
                       <span className="hidden sm:inline">Xem</span>
                     </Link>
-                    <button
-                      onClick={() => setIsEditing(true)}
-                      className="flex items-center gap-1.5 px-4 py-2 bg-amber-100/80 text-amber-800 rounded-full hover:bg-amber-200 font-semibold text-sm shadow-sm border border-amber-200/50 transition-colors"
-                    >
-                      <Edit2 className="size-4" />
-                      <span className="hidden sm:inline">Chỉnh sửa</span>
-                    </button>
+                    {canEdit && (
+                      <button
+                        onClick={() => setIsEditing(true)}
+                        className="flex items-center gap-1.5 px-4 py-2 bg-amber-100/80 text-amber-800 rounded-full hover:bg-amber-200 font-semibold text-sm shadow-sm border border-amber-200/50 transition-colors"
+                      >
+                        <Edit2 className="size-4" />
+                        <span className="hidden sm:inline">Chỉnh sửa</span>
+                      </button>
+                    )}
                   </>
                 )
               )}

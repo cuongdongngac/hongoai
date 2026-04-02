@@ -129,6 +129,8 @@ export default function MindmapTree({
         setAutoCollapseLevel={setAutoCollapseLevel}
         setExpandSignal={setExpandSignal}
         canEdit={canEdit}
+        persons={Array.from(personsMap.values())}
+        relationships={relationships}
       />
 
       {/* Root Container */}

@@ -128,11 +128,6 @@ function sanitizeCustomEvent(
 export async function exportData(
   exportRootId?: string,
 ): Promise<BackupPayload | { error: string }> {
-  const isAdmin = await getIsAdmin();
-  if (!isAdmin) {
-    return { error: "Từ chối truy cập. Chỉ admin mới có quyền này." };
-  }
-
   const supabase = await getSupabase();
 
   // Fetch ALL persons and relationships first to perform traversal in memory.

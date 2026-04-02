@@ -1,5 +1,7 @@
 import { Crosshair, ZoomIn, ZoomOut } from "lucide-react";
 import BaseToolbar, { BaseToolbarProps } from "./BaseToolbar";
+import ExportButton from "./ExportButton";
+import { Person, Relationship } from "@/types";
 
 interface TreeToolbarProps extends BaseToolbarProps {
   scale: number;
@@ -7,6 +9,8 @@ interface TreeToolbarProps extends BaseToolbarProps {
   handleZoomOut: () => void;
   handleResetZoom: () => void;
   handleCenter: () => void;
+  persons: Person[];
+  relationships: Relationship[];
 }
 
 export default function TreeToolbar({
@@ -15,6 +19,8 @@ export default function TreeToolbar({
   handleZoomOut,
   handleResetZoom,
   handleCenter,
+  persons,
+  relationships,
   ...baseProps
 }: TreeToolbarProps) {
   return (
@@ -54,6 +60,9 @@ export default function TreeToolbar({
       >
         <Crosshair className="size-4" />
       </button>
+
+      {/* Export Button */}
+      <ExportButton persons={persons} relationships={relationships} />
     </BaseToolbar>
   );
 }
