@@ -5,7 +5,6 @@ import { Filter } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useDashboard } from "./DashboardContext";
-import ExportButton from "./ExportButton";
 
 export interface BaseToolbarProps {
   hideDaughtersInLaw: boolean;
@@ -24,7 +23,6 @@ export interface BaseToolbarProps {
   setHideExpandButtons?: (val: boolean) => void;
   autoCollapseLevel?: number;
   setAutoCollapseLevel?: (val: number) => void;
-  canEdit?: boolean;
   children?: React.ReactNode;
 }
 
@@ -45,7 +43,6 @@ export default function BaseToolbar({
   setHideExpandButtons,
   autoCollapseLevel,
   setAutoCollapseLevel,
-  canEdit,
   children,
 }: BaseToolbarProps) {
   const { showAvatar, setShowAvatar } = useDashboard();
@@ -213,9 +210,6 @@ export default function BaseToolbar({
           )}
         </AnimatePresence>
       </div>
-
-      {/* Export Button */}
-      {canEdit && <ExportButton />}
     </div>,
     portalNode,
   );

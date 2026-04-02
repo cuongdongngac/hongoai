@@ -341,7 +341,6 @@ export default function FamilyTree({
         setHideMales={setHideMales}
         hideFemales={hideFemales}
         setHideFemales={setHideFemales}
-        canEdit={canEdit}
         persons={Array.from(personsMap.values())}
         relationships={relationships}
       />

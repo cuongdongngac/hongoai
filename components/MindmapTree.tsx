@@ -128,7 +128,6 @@ export default function MindmapTree({
         autoCollapseLevel={autoCollapseLevel}
         setAutoCollapseLevel={setAutoCollapseLevel}
         setExpandSignal={setExpandSignal}
-        canEdit={canEdit}
         persons={Array.from(personsMap.values())}
         relationships={relationships}
       />

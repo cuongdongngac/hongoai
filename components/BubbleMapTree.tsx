@@ -10,7 +10,6 @@ export interface BubbleMapTreeProps {
   personsMap: Map<string, Person>;
   relationships: Relationship[];
   roots: Person[];
-  canEdit?: boolean;
 }
 
 // Define D3 Node and Link types

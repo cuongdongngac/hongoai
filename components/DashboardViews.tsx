@@ -119,7 +119,6 @@ export default function DashboardViews({
               personsMap={personsMap}
               relationships={relationships}
               roots={roots}
-              canEdit={canEdit}
             />
           )}
         </div>
