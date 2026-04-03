@@ -84,6 +84,7 @@ export default function ExportButton({
         extension = "json";
       } else {
         const { exportToGedcom } = await import("@/utils/gedcom");
+        // Removed unused @ts-expect-error as types are now handled correctly
         content = exportToGedcom({
           persons: data.persons,
           relationships: data.relationships,
