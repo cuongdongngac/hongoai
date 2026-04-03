@@ -119,10 +119,41 @@ export default function ExportButton({
 
       if (format === "html") {
         if (view === "list") {
-          const { generateListHTML } = await import("@/utils/htmlExport");
-          const html = await generateListHTML(persons);
+          const element = document.getElementById("export-container");
+          if (!element) throw new Error("Không tìm thấy vùng dữ liệu để xuất.");
+
+          let htmlContent = element.outerHTML;
+          // Fix relative image urls so they load correctly offline
+          const baseUrl = window.location.origin;
+          htmlContent = htmlContent.replace(/src="\/([^"]+)"/g, `src="${baseUrl}/$1"`);
+
+          const htmlString = `
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <title>Gia Phả - Danh Sách Thành Viên</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body { background-color: #f5f5f4; padding: 2rem; font-family: ui-sans-serif, system-ui, sans-serif; }
+      /* Disable interactions */
+      button { pointer-events: none; }
+      a { pointer-events: none; display: none !important; }
+      /* Adjust styling for offline view */
+      #export-container { max-width: 80rem; margin: 0 auto; }
+    </style>
+</head>
+<body>
+    <div style="max-width: 80rem; margin: 0 auto; margin-bottom: 2rem; text-align: center;">
+      <h1 class="text-3xl font-bold font-serif text-stone-900 mb-2">Danh Sách Thành Viên Gia Phả</h1>
+    </div>
+    ${htmlContent}
+</body>
+</html>`;
+
           const filename = `gia-pha-danh-sach-${new Date().toISOString().split("T")[0]}.html`;
-          downloadHTMLFile(html, filename);
+          const { downloadHTMLFile } = await import("@/utils/htmlExport");
+          downloadHTMLFile(htmlString, filename);
           return;
         }
 
