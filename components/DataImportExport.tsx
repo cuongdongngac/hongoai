@@ -7,7 +7,11 @@ import { AlertTriangle, CheckCircle2, Download, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import PersonSelector from "./PersonSelector";
 
-export default function DataImportExport() {
+export default function DataImportExport({
+  isAdmin = false,
+}: {
+  isAdmin?: boolean;
+}) {
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -219,7 +223,9 @@ export default function DataImportExport() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div
+        className={`grid grid-cols-1 ${isAdmin ? "md:grid-cols-2" : ""} gap-6`}
+      >
         {/* Export Card */}
         <div className="bg-white/80 border border-stone-200/60 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow relative group">
           {/* Background Decor */}
@@ -297,110 +303,114 @@ export default function DataImportExport() {
         </div>
 
         {/* Import Card */}
-        <div className="bg-white/80 border border-stone-200/60 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow relative group">
-          {/* Background Decor */}
-          <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-rose-200/20 rounded-full blur-2xl -mr-16 -mt-16 group-hover:bg-rose-300/30 transition-colors" />
-          </div>
-
-          <div className="flex items-start gap-4 mb-4 relative z-10">
-            <div className="p-3 bg-rose-50 rounded-xl text-rose-600">
-              <Upload className="size-6" />
+        {isAdmin && (
+          <div className="bg-white/80 border border-stone-200/60 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow relative group">
+            {/* Background Decor */}
+            <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-rose-200/20 rounded-full blur-2xl -mr-16 -mt-16 group-hover:bg-rose-300/30 transition-colors" />
             </div>
-            <div>
-              <h3 className="text-lg font-bold text-stone-800">
-                Phục hồi dữ liệu
-              </h3>
-              <p className="text-sm text-stone-500 mt-1">
-                Khôi phục cây gia phả từ file đã sao lưu (.json, .ged, hoặc
-                .zip).
-                <span className="font-semibold text-rose-600 ml-1">
-                  Cảnh báo: Tác vụ này sẽ xoá toàn bộ dữ liệu hiện tại!
-                </span>
-              </p>
-            </div>
-          </div>
 
-          <input
-            type="file"
-            accept=".json,.ged,.zip,.csv"
-            className="hidden"
-            ref={fileInputRef}
-            onChange={handleFileChange}
-          />
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isImporting}
-            className="btn w-full"
-          >
-            {isImporting ? "Đang xử lý..." : "Chọn file phục hồi"}
-          </button>
-        </div>
+            <div className="flex items-start gap-4 mb-4 relative z-10">
+              <div className="p-3 bg-rose-50 rounded-xl text-rose-600">
+                <Upload className="size-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-stone-800">
+                  Phục hồi dữ liệu
+                </h3>
+                <p className="text-sm text-stone-500 mt-1">
+                  Khôi phục cây gia phả từ file đã sao lưu (.json, .ged, hoặc
+                  .zip).
+                  <span className="font-semibold text-rose-600 ml-1">
+                    Cảnh báo: Tác vụ này sẽ xoá toàn bộ dữ liệu hiện tại!
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            <input
+              type="file"
+              accept=".json,.ged,.zip,.csv"
+              className="hidden"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isImporting}
+              className="btn w-full"
+            >
+              {isImporting ? "Đang xử lý..." : "Chọn file phục hồi"}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Confirmation Modal */}
-      <AnimatePresence>
-        {showConfirm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-stone-900/40 backdrop-blur-sm cursor-pointer"
-              onClick={() => setShowConfirm(false)}
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="bg-white rounded-2xl shadow-xl border border-stone-200/60 p-6 w-full max-w-md relative z-10"
-            >
-              <div className="flex items-start gap-4 mb-5">
-                <div className="p-3 bg-rose-100/50 rounded-full text-rose-600 shrink-0 mt-1">
-                  <AlertTriangle className="size-6" />
+      {isAdmin && (
+        <AnimatePresence>
+          {showConfirm && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-stone-900/40 backdrop-blur-sm cursor-pointer"
+                onClick={() => setShowConfirm(false)}
+              />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                className="bg-white rounded-2xl shadow-xl border border-stone-200/60 p-6 w-full max-w-md relative z-10"
+              >
+                <div className="flex items-start gap-4 mb-5">
+                  <div className="p-3 bg-rose-100/50 rounded-full text-rose-600 shrink-0 mt-1">
+                    <AlertTriangle className="size-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-stone-800">
+                      Xác nhận phục hồi
+                    </h3>
+                    <p className="text-sm text-stone-600 mt-2 leading-relaxed">
+                      Hệ thống sẽ xoá{" "}
+                      <b>
+                        toàn bộ dữ liệu thành viên, mối quan hệ, thông tin riêng
+                        tư và sự kiện hiện tại
+                      </b>{" "}
+                      để thay thế bằng dữ liệu từ file{" "}
+                      <span className="font-mono text-xs bg-stone-100 px-1 rounded">
+                        {selectedFile?.name}
+                      </span>
+                      .
+                    </p>
+                    <p className="text-sm text-rose-600 font-semibold mt-2">
+                      Hành động này không thể hoàn tác. Bạn đã chắc chắn?
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-lg font-bold text-stone-800">
-                    Xác nhận phục hồi
-                  </h3>
-                  <p className="text-sm text-stone-600 mt-2 leading-relaxed">
-                    Hệ thống sẽ xoá{" "}
-                    <b>
-                      toàn bộ dữ liệu thành viên, mối quan hệ, thông tin riêng
-                      tư và sự kiện hiện tại
-                    </b>{" "}
-                    để thay thế bằng dữ liệu từ file{" "}
-                    <span className="font-mono text-xs bg-stone-100 px-1 rounded">
-                      {selectedFile?.name}
-                    </span>
-                    .
-                  </p>
-                  <p className="text-sm text-rose-600 font-semibold mt-2">
-                    Hành động này không thể hoàn tác. Bạn đã chắc chắn?
-                  </p>
-                </div>
-              </div>
 
-              <div className="flex justify-end gap-3 mt-6">
-                <button
-                  onClick={() => setShowConfirm(false)}
-                  disabled={isImporting}
-                  className="px-4 py-2 text-sm font-medium text-stone-600 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 rounded-xl transition-colors"
-                >
-                  Huỷ bỏ
-                </button>
-                <button
-                  onClick={handleConfirmImport}
-                  disabled={isImporting}
-                  className="px-4 py-2 text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl transition-colors shadow-sm disabled:opacity-50"
-                >
-                  {isImporting ? "Đang phục hồi..." : "Vẫn tiếp tục"}
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+                <div className="flex justify-end gap-3 mt-6">
+                  <button
+                    onClick={() => setShowConfirm(false)}
+                    disabled={isImporting}
+                    className="px-4 py-2 text-sm font-medium text-stone-600 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 rounded-xl transition-colors"
+                  >
+                    Huỷ bỏ
+                  </button>
+                  <button
+                    onClick={handleConfirmImport}
+                    disabled={isImporting}
+                    className="px-4 py-2 text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl transition-colors shadow-sm disabled:opacity-50"
+                  >
+                    {isImporting ? "Đang phục hồi..." : "Vẫn tiếp tục"}
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+      )}
 
       {/* Status messages */}
       <AnimatePresence>

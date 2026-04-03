@@ -5,10 +5,11 @@ import { redirect } from "next/navigation";
 export default async function LineagePage() {
   const profile = await getProfile();
 
-  if (profile?.role !== "admin") {
+  if (!profile?.is_active) {
     redirect("/dashboard");
   }
 
+  const canEdit = profile?.role === "admin" || profile?.role === "editor";
   const supabase = await getSupabase();
 
   const { data: personsData } = await supabase
@@ -86,7 +87,11 @@ export default async function LineagePage() {
 
         {/* Manager */}
         <div className="bg-white/80 rounded-2xl border border-stone-200/60 shadow-sm p-5 sm:p-8">
-          <LineageManager persons={persons} relationships={relationships} />
+          <LineageManager
+            persons={persons}
+            relationships={relationships}
+            canEdit={canEdit}
+          />
         </div>
       </div>
     </main>
