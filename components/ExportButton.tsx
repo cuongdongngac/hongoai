@@ -118,6 +118,14 @@ export default function ExportButton({
       setError(null);
 
       if (format === "html") {
+        if (view === "list") {
+          const { generateListHTML } = await import("@/utils/htmlExport");
+          const html = await generateListHTML(persons);
+          const filename = `gia-pha-danh-sach-${new Date().toISOString().split("T")[0]}.html`;
+          downloadHTMLFile(html, filename);
+          return;
+        }
+
         if (!rootId) {
           throw new Error("Vui lòng chọn gốc hiển thị trước khi xuất HTML.");
         }

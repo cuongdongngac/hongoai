@@ -303,6 +303,84 @@ export const generateInteractiveHTML = async (data: ExportData) => {
   throw new Error('Unsupported view type');
 };
 
+export const generateListHTML = async (persons: Person[]) => {
+  // Sort persons by generation just like the UI, or just simple list
+  const sortedPersons = [...persons].sort((a, b) => {
+      const genA = a.generation || 999;
+      const genB = b.generation || 999;
+      if (genA !== genB) return genA - genB;
+      return (a.birth_year || 9999) - (b.birth_year || 9999);
+  });
+
+  let html = `
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <title>Gia Phả - Danh Sách Thành Viên</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f4; }
+        h1 { text-align: center; color: #333; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f8f9fa; font-weight: bold; }
+        tr:nth-child(even) { background-color: #f9fafb; }
+        tr:hover { background-color: #f1f5f9; }
+        .controls { text-align: center; margin: 20px 0; }
+        .btn { padding: 10px 20px; margin: 0 10px; border: none; border-radius: 5px; cursor: pointer; background: #3b82f6; color: white; }
+        .btn:hover { background: #2563eb; }
+        @media print { .controls { display: none; } }
+    </style>
+</head>
+<body>
+    <h1>Danh Sách Thành Viên Gia Phả</h1>
+    <div class="controls">
+        <button class="btn" onclick="window.print()">In ấn</button>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>STT</th>
+                <th>Thế hệ</th>
+                <th>Họ và tên</th>
+                <th>Giới tính</th>
+                <th>Năm sinh</th>
+                <th>Năm mất</th>
+                <th>Vai vế</th>
+                <th>Tên khác / Ghi chú</th>
+            </tr>
+        </thead>
+        <tbody>
+`;
+
+  sortedPersons.forEach((person, index) => {
+    const generationText = person.generation ? `Đời thứ ${person.generation}` : 'N/A';
+    const genderText = person.gender === "female" ? "Nữ" : "Nam";
+    const statusText = person.is_in_law ? (person.gender === "female" ? "Con dâu" : "Con rể") : "Huyết thống";
+    
+    html += `
+            <tr>
+                <td>${index + 1}</td>
+                <td>${generationText}</td>
+                <td><strong>${person.full_name}</strong></td>
+                <td>${genderText}</td>
+                <td>${person.birth_year || ""}</td>
+                <td>${person.is_deceased ? (person.death_year || "Đã mất") : ""}</td>
+                <td>${statusText}</td>
+                <td>${person.other_names || ""}</td>
+            </tr>
+`;
+  });
+
+  html += `
+        </tbody>
+    </table>
+</body>
+</html>`;
+
+  return html;
+};
+
 export const downloadHTMLFile = (html: string, filename: string) => {
   const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
   const url = URL.createObjectURL(blob);
