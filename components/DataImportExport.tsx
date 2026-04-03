@@ -53,7 +53,12 @@ export default function DataImportExport() {
 
       if (format === "csv") {
         const { exportToCsvZip } = await import("@/utils/csv");
-        const zipBlob = await exportToCsvZip(data);
+        const zipBlob = await exportToCsvZip({
+          persons: data.persons,
+          relationships: data.relationships,
+          person_details_private: data.person_details_private,
+          custom_events: data.custom_events,
+        });
         const url = URL.createObjectURL(zipBlob);
         const a = document.createElement("a");
         a.href = url;
@@ -75,7 +80,10 @@ export default function DataImportExport() {
         extension = "json";
       } else {
         const { exportToGedcom } = await import("@/utils/gedcom");
-        content = exportToGedcom(data);
+        content = exportToGedcom({
+          persons: data.persons,
+          relationships: data.relationships,
+        });
         type = "text/plain";
         extension = "ged";
       }
@@ -357,8 +365,11 @@ export default function DataImportExport() {
                   </h3>
                   <p className="text-sm text-stone-600 mt-2 leading-relaxed">
                     Hệ thống sẽ xoá{" "}
-                    <b>toàn bộ dữ liệu thành viên, mối quan hệ, thông tin riêng tư và sự kiện hiện tại</b> để
-                    thay thế bằng dữ liệu từ file{" "}
+                    <b>
+                      toàn bộ dữ liệu thành viên, mối quan hệ, thông tin riêng
+                      tư và sự kiện hiện tại
+                    </b>{" "}
+                    để thay thế bằng dữ liệu từ file{" "}
                     <span className="font-mono text-xs bg-stone-100 px-1 rounded">
                       {selectedFile?.name}
                     </span>

@@ -57,7 +57,12 @@ export default function ExportButton({
 
       if (format === "csv") {
         const { exportToCsvZip } = await import("@/utils/csv");
-        const zipBlob = await exportToCsvZip(data);
+        const zipBlob = await exportToCsvZip({
+          persons: data.persons,
+          relationships: data.relationships,
+          person_details_private: data.person_details_private,
+          custom_events: data.custom_events,
+        });
         const url = URL.createObjectURL(zipBlob);
         const a = document.createElement("a");
         a.href = url;
@@ -79,7 +84,10 @@ export default function ExportButton({
         extension = "json";
       } else {
         const { exportToGedcom } = await import("@/utils/gedcom");
-        content = exportToGedcom(data);
+        content = exportToGedcom({
+          persons: data.persons,
+          relationships: data.relationships,
+        });
         type = "text/plain";
         extension = "ged";
       }

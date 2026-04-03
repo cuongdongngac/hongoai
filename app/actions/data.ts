@@ -1,6 +1,6 @@
 "use server";
 
-import { Relationship } from "@/types";
+import { Relationship, RelationshipType } from "@/types";
 import { getIsAdmin, getSupabase } from "@/utils/supabase/queries";
 import { revalidatePath } from "next/cache";
 
@@ -38,7 +38,7 @@ interface PersonExport {
 
 interface RelationshipExport {
   id?: string;
-  type: string;
+  type: RelationshipType;
   person_a: string;
   person_b: string;
   note?: string | null;
