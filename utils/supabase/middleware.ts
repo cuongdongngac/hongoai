@@ -50,8 +50,6 @@ export async function updateSession(request: NextRequest) {
   // Routes that require authentication (admin/editor only)
   const adminOnlyPaths = [
     "/dashboard/users",
-    "/dashboard/data",
-    "/dashboard/lineage",
     "/dashboard/members/new",
   ];
   // Edit pages: /dashboard/members/[id]/edit
@@ -64,6 +62,12 @@ export async function updateSession(request: NextRequest) {
     adminOnlyPaths.some((path) =>
       request.nextUrl.pathname.startsWith(path),
     );
+
+  // Paths that are restricted to members/admins (not for guests)
+  const memberOnlyPaths = ["/dashboard/data"];
+  const isMemberOnlyPath = memberOnlyPaths.some((path) =>
+    request.nextUrl.pathname.startsWith(path),
+  );
 
   // Any dashboard path (for DB schema check)
   const isDashboardPath = request.nextUrl.pathname.startsWith("/dashboard");
@@ -86,8 +90,8 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  // Admin-only paths require login
-  if (isAdminOnlyPath && !user) {
+  // Restricted paths require login
+  if ((isAdminOnlyPath || isMemberOnlyPath) && !user) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);

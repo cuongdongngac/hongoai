@@ -5,10 +5,12 @@ import { redirect } from "next/navigation";
 export default async function LineagePage() {
   const profile = await getProfile();
 
-  if (!profile?.is_active) {
+  // If logged in but not active, redirect. Guests (no profile) are allowed.
+  if (profile && !profile?.is_active) {
     redirect("/dashboard");
   }
 
+  const isAdmin = profile?.role === "admin";
   const canEdit = profile?.role === "admin" || profile?.role === "editor";
   const supabase = await getSupabase();
 

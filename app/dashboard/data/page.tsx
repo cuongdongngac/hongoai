@@ -5,7 +5,8 @@ import { redirect } from "next/navigation";
 export default async function DataManagementPage() {
   const profile = await getProfile();
 
-  if (!profile?.is_active) {
+  // Redirect if logged in but not active. Guest access handled by middleware.
+  if (profile && !profile?.is_active) {
     redirect("/dashboard");
   }
 
@@ -20,9 +21,11 @@ export default async function DataManagementPage() {
       <div className="max-w-7xl mx-auto px-4 pb-8 sm:px-6 lg:px-8 w-full relative z-10">
         <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center">
           <div>
-            <h1 className="title">{isAdmin ? "Sao lưu & Phục hồi" : "Sao lưu dữ liệu"}</h1>
+            <h1 className="title">
+              {isAdmin ? "Sao lưu & Phục hồi" : "Sao lưu dữ liệu"}
+            </h1>
             <p className="text-stone-500 mt-2 text-sm sm:text-base max-w-2xl">
-              {isAdmin 
+              {isAdmin
                 ? "Quản lý dữ liệu an toàn. Bạn có thể tải xuống bản sao lưu để lưu trữ hoặc phục hồi lại dữ liệu từ file đã lưu."
                 : "Tải xuống bản sao lưu để lưu trữ dữ liệu cá nhân hoặc gia đình."}
             </p>
