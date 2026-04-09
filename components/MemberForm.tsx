@@ -96,14 +96,13 @@ export default function MemberForm({
   );
 
   const [note, setNote] = useState(initialData?.note || "");
+  const [tombInfo, setTombInfo] = useState(initialData?.tomb_info || "");
 
   // Private fields
   const [phoneNumber, setPhoneNumber] = useState(
     initialData?.phone_number ?? "",
   );
-  const [occupation, setOccupation] = useState(
-    initialData?.occupation ?? "",
-  );
+  const [occupation, setOccupation] = useState(initialData?.occupation ?? "");
   const [currentResidence, setCurrentResidence] = useState(
     initialData?.current_residence ?? "",
   );
@@ -326,6 +325,7 @@ export default function MemberForm({
         other_names: otherNames || null,
         avatar_url: url,
         note: note || null,
+        tomb_info: isDeceased ? tombInfo || null : null,
       });
 
       let currentPersonId = initialData?.id;
@@ -844,6 +844,19 @@ export default function MemberForm({
                         />
                       </div>
                     </div>
+                  </div>
+
+                  <div className="mt-4">
+                    <label className="block text-sm font-semibold text-stone-700 mb-1.5">
+                      Mộ phần
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={tombInfo}
+                      onChange={(e) => setTombInfo(e.target.value)}
+                      placeholder="Thông tin về nơi an táng, số mộ..."
+                      className={`${inputClasses} resize-none`}
+                    />
                   </div>
                 </motion.div>
               )}

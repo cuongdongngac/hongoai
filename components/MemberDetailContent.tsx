@@ -328,6 +328,16 @@ export default function MemberDetailContent({
                             ) || "Chưa rõ"}
                       </p>
                     )}
+                    {person.tomb_info && (
+                      <div className="mt-3 pt-3 border-t border-stone-100">
+                        <dt className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                          Mộ phần
+                        </dt>
+                        <dd className="text-xs font-semibold text-stone-700 leading-relaxed">
+                          {person.tomb_info}
+                        </dd>
+                      </div>
+                    )}
                   </div>
                 </motion.div>
               )}

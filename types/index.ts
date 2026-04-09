@@ -52,6 +52,7 @@ export interface Person {
   birth_order: number | null;
   generation: number | null;
   other_names: string | null;
+  tomb_info: string | null;
 }
 
 export interface Relationship {

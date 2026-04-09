@@ -127,6 +127,19 @@ export default function PersonCard({ person }: PersonCardProps) {
                 )}
               </div>
             )}
+            {isDeceased && person.tomb_info && (
+              <div className="mt-2.5 pt-2 border-t border-stone-100 flex items-start gap-1.5 min-w-0">
+                <span className="text-[10px] text-stone-400 font-bold uppercase tracking-wider shrink-0 mt-0.5">
+                  Mộ phần:
+                </span>
+                <span
+                  className="text-[11px] text-stone-600 font-medium truncate italic"
+                  title={person.tomb_info}
+                >
+                  {person.tomb_info}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </button>
